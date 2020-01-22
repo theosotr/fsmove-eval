@@ -170,6 +170,9 @@ the container will exit.
 Below, we provide the details of
 our command.
 
+* `--security-opt` (Docker option): This option
+  enables system call tracing
+  inside the Docker container.
 * `-v` (Docker option): Through the option `-v`,
   we mount two local files inside container.
   First, we mount the script located
@@ -246,3 +249,53 @@ as it appears at line 169402 of
 the corresponding `strace` file.
 For more details see the first motivating example
 described in our paper (Section 2).
+
+### Running and analyzing a Real-world Puppet module
+
+It's time to run and analyze a real-world Puppet module,
+namely [alertlogic-al_agents](https://forge.puppet.com/alertlogic/al_agents),
+through `FSMove`.
+Again,
+we will use our Docker image `fsmove`
+to spawn a fresh Puppet environment.
+Run the following command
+```bash
+ sudo docker run -ti --rm  --security-opt seccomp:unconfined -v "$(pwd)"/out:/home/fsmove/data fsmove -m alertlogic-al_agents -i 0.2.0 -s
+```
+Notice that this time,
+we provided the option `-i 0.2.0`,
+as we need to install the `alertlogic-al_agents` module
+(version 0.2.0) in the system,
+before proceeding to the analysis.
+Also,
+notice that this time
+we did not mount any file into
+`/home/fsmove/init.pp`,
+because the script will create the entrypoint file
+that uses `alertlogic-al_agents`,
+after the installation of the corresponding module.
+
+After the completion of the command above
+(it takes 1-2 minutes),
+we are now ready to examine the results of the analysis
+stored inside the `out/` directory.
+The contents of `out/alertlogic-al_agents.faults` file
+are
+```bash
+Start executing manifest /home/fsmove/init.pp ...
+Missing Ordering Relationships:
+===============================
+# Faults: 1
+Pairs:
+  * Exec[download]: /etc/puppet/code/environments/production/modules/al_agents/manifests/install.pp: 7
+  * Package[al-agent]: /etc/puppet/code/environments/production/modules/al_agents/manifests/install.pp: 24 => 
+      Conflict on 1 resources:
+      - /tmp/al-agent: Produced by Exec[download] ( open at line 46027 ) and Consumed by Package[al-agent] ( open at line 54187 )
+
+Analysis time: 23.1748681068
+```
+Notably,
+`FSMove` detected one ordering violation,
+between `Exec[download]` and `Package[al-agent]` resources.
+For more details about this fault,
+see Section 6.3.1 of our paper.
