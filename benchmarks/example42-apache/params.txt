@@ -1,0 +1,3 @@
+version: 2.1.13
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: example42-apache

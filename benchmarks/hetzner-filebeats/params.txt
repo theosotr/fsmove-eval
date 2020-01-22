@@ -1,0 +1,3 @@
+version: 1.0.3
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: hetzner-filebeats

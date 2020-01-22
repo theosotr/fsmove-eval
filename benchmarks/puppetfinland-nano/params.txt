@@ -1,0 +1,3 @@
+version: 1.0.1
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: puppetfinland-nano

@@ -1,0 +1,3 @@
+version: 3.0.0
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: sgnl05-sssd

@@ -1,0 +1,3 @@
+version: 0.1.7
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: noerdisch-codeception

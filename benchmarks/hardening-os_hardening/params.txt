@@ -1,0 +1,3 @@
+version: 2.2.1
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: hardening-os_hardening

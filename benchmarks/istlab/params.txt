@@ -1,0 +1,3 @@
+version: no
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: istlab

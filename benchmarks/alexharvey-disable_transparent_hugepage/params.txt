@@ -1,0 +1,3 @@
+version: 1.4.0
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: alexharvey-disable_transparent_hugepage

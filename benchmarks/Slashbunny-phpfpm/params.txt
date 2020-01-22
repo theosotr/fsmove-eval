@@ -1,0 +1,3 @@
+version: 0.0.21
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: Slashbunny-phpfpm

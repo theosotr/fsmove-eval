@@ -1,0 +1,3 @@
+version: 0.11.2
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: albatrossflavour-os_patching
