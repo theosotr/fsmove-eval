@@ -371,7 +371,8 @@ Then, run the following command from the newly-created container
 ```bash
 fsmove@b7b5bca1a9df:~$ ./scripts/analyze-traces.sh traces
 ```
-When this script terminates,
+When this script terminates
+(roughly 10-20 minutes),
 you can exit container and
 inspect the analysis results
 stored in `traces/` directory.
