@@ -113,12 +113,11 @@ exit
 
 ## Running first examples
 
-Inside the `examples/` directory of this repository,
-there are two simple Puppet scripts.
+### Example1: Setup a MySQL DB
 
-### Setup a MySQL DB
-
-The first Puppet script (`examples/mysql_db.pp`),
+Inside the `example/` directory of this repository,
+there is one simple Puppet script.
+This Puppet script (`examples/mysql_db.pp`),
 installs the `mysql-common` and `mysql-server` packages,
 configures the file `/etc/mysql/my.cnf`,
 and initializes the MySQL database by
@@ -219,7 +218,7 @@ The contents of `mysql-db.faults` are similar to
 Start executing manifest /home/fsmove/init.pp ...
 Missing Ordering Relationships:
 ===============================
-# Faults: 1
+Number of MOR: 1
 Pairs:
   * File[/etc/mysql/my.cnf]: /etc/puppet/code/environments/production/manifests/init.pp: 14
   * Exec[Initialize MySQL DB]: /etc/puppet/code/environments/production/manifests/init.pp: 20 =>
@@ -250,7 +249,7 @@ the corresponding `strace` file.
 For more details see the first motivating example
 described in our paper (Section 2).
 
-### Running and analyzing a Real-world Puppet module
+### Example2: Running and analyzing a Real-world Puppet module
 
 It's time to run and analyze a real-world Puppet module,
 namely [alertlogic-al_agents](https://forge.puppet.com/alertlogic/al_agents),
@@ -285,7 +284,7 @@ are
 Start executing manifest /home/fsmove/init.pp ...
 Missing Ordering Relationships:
 ===============================
-# Faults: 1
+Number of MOR: 1
 Pairs:
   * Exec[download]: /etc/puppet/code/environments/production/modules/al_agents/manifests/install.pp: 7
   * Package[al-agent]: /etc/puppet/code/environments/production/modules/al_agents/manifests/install.pp: 24 => 
@@ -299,3 +298,82 @@ Notably,
 between `Exec[download]` and `Package[al-agent]` resources.
 For more details about this fault,
 see Section 6.3.1 of our paper.
+
+# Run Benchmarks
+
+The directory `benchmarks/` includes
+34 directories representing
+the Puppet modules listed in Table 1 of our paper.
+Each directory contains the `init.pp` file
+corresponding to the entrypoint script for executing the
+module inside the container,
+and the `params.txt` contains parameters for
+properly setting up the environment before analysis.
+For example,
+the following `params.txt` shows that
+the script needs to install `albatrossflavour-os_patching`
+(version 0.11.2) inside
+the `/home/fsmove/.puppet/etc/code/modules` directory.
+```bash
+version: 0.11.2
+modulepath: /home/fsmove/.puppet/etc/code/modules
+modulename: albatrossflavour-os_patching
+```
+Some modules optionally contain a script
+named `pre-script.sh`,
+in case it is needed to run a custom script
+before the execution and analysis of Puppet module.
+
+To run benchmarks, execute the following script
+from your host machine.
+```bash
+./scripts/run-benchmarks.sh
+```
+This script will take 20-50 minutes depending on your machine.
+It produces a directory
+(namely `benchmark-results`)
+that contains the analysis results
+for every benchmark.
+Each sub-directory contains the six files produced by the analysis
+of the corresponding module.
+The script also generates the `benchmark-results/faults.csv`
+file that shows the occurrence of each fault type
+in every benchmark.
+
+If you want to run a specific benchmark
+(e.g., albatrossflavour-os_patching),
+then simply run
+```
+./scripts/run-benchamrks.sh albatrossflavour-os_patching
+```
+
+# Run Dataset of Traces
+
+For further offline trace analysis,
+we also provide the traces and compiled catalogs
+stemming from the execution of all Puppet modules
+examined in our evaluation.
+You can download the dataset of traces
+as follows
+```bash
+wget -O traces.zip <url>
+tar -xvf traces.zip
+```
+
+To analyze all traces using `FSMove`,
+create a container,
+and enter container's shell
+by running.
+```bash
+docker run -ti --rm  --security-opt seccomp:unconfined -v $(pwd)/scripts:/home/fsmove/scripts  -v $(pwd)/traces:/home/fsmove/traces fsmove
+```
+Then, run the following command from the newly-created container
+```bash
+fsmove@b7b5bca1a9df:~$ ./scripts/analyze-traces.sh traces
+```
+When this script terminates,
+you can exit container and
+inspect the analysis results
+stored in `traces/` directory.
+The script also generates the `traces/faults.csv` file
+which gives a summary of fault detection results.
