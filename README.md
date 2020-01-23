@@ -259,7 +259,7 @@ we will use our Docker image `fsmove`
 to spawn a fresh Puppet environment.
 Run the following command
 ```bash
- sudo docker run -ti --rm  --security-opt seccomp:unconfined -v "$(pwd)"/out:/home/fsmove/data fsmove -m alertlogic-al_agents -i 0.2.0 -s
+docker run -ti --rm  --security-opt seccomp:unconfined -v "$(pwd)"/out:/home/fsmove/data fsmove -m alertlogic-al_agents -i 0.2.0 -s
 ```
 Notice that this time,
 we provided the option `-i 0.2.0`,
