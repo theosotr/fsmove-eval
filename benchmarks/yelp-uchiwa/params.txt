@@ -1,3 +1,0 @@
-version: 2.1.0
-modulepath: /home/fsmove/.puppet/etc/code/modules
-modulename: uchiwa
