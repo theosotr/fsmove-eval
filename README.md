@@ -67,17 +67,17 @@ This will take roughly 10-15 minutes.
 
 # Getting Started
 
-## Navigating Docker Image
+## Navigating through the Docker Image
 
-Before running our first examples,
+Before running our examples,
 let's explore the contents of our freshly-created Docker
 image.
 Run the following command to create a new container.
 ```bash
 docker run -ti --rm  --security-opt seccomp:unconfined fsmove
 ```
-After executing this command,
-you will enter the home directory
+After executing the command,
+you will be able to enter the home directory
 (i.e., `/home/fsmove`) of the `fsmove` user.
 This directory contains the `fsmove_src`
 where the source code of our tool is stored.
@@ -108,7 +108,7 @@ by running
 fsmove@606771a763fd:~$ exit
 ```
 
-## Running first examples
+## Running the first examples
 
 ### Example1: Setup a MySQL DB
 
@@ -192,7 +192,7 @@ our command.
 * `-m` (Image option): This option takes the name
   of the module as it is specified in [Forge API](https://forge.puppet.com/).
   In this example, we provide an arbitrary module name,
-  since the provided Puppet script does not exist in Forge API.
+  because the provided Puppet script does not exist in Forge API.
 * `-i` (Image option): This option indicates if we must install
   the Puppet module from Forge API before proceeding to the analysis.
   Available options are `no`, `latest`, and `<version-number>`.
@@ -208,15 +208,15 @@ you can examine the results of the analysis
 inside the `$(pwd)/out/` directory.
 In particular,
 the command produces the following six (6) files:
-* `mysql-db.json`: Compiled catalog of the corresponding Puppet module.
-* `mysql-db.strace`: System call trace produced by `strace`.
-* `mysql-db.size`: Size of system call trace (in bytes)
-* `application.time`: Time spent to apply module.
-* `mysql-db.times`: Time spent on trace analysis
-* `mysql-db.faults`: Faults detected by `FSMove`.
+* `mysql-db.json`: the compiled catalog of the corresponding Puppet module.
+* `mysql-db.strace`: a system call trace produced by `strace`.
+* `mysql-db.size`: the size of system call trace (in bytes)
+* `application.time`: time spent to apply the module.
+* `mysql-db.times`: time spent on trace analysis
+* `mysql-db.faults`: faults detected by `FSMove`.
 
 
-The contents of `mysql-db.faults` are similar to
+The contents of `mysql-db.faults` are similar to the following:
 ```bash
 Start executing manifest /home/fsmove/init.pp ...
 Missing Ordering Relationships:
@@ -253,11 +253,11 @@ For more details about this fault,
 see the first motivating example
 described in our paper (Section 2).
 
-### Example2: Running and analyzing a Real-world Puppet module
+### Example2: Running and analyzing a real-world Puppet module
 
 It's time to run and analyze a real-world Puppet module,
 namely [alertlogic-al_agents](https://forge.puppet.com/alertlogic/al_agents),
-through `FSMove`.
+using `FSMove`.
 Again,
 we will use our Docker image `fsmove`
 to spawn a fresh Puppet environment.
@@ -308,11 +308,11 @@ between `Exec[download]` and `Package[al-agent]` resources.
 For more details about this fault,
 see Section 6.3.1 of our paper.
 
-# Run Benchmarks
+# Benchmarks
 
-This repository also includes one directory,
-that is `benchmarks/`,
-which includes
+This repository also includes one directory:
+`benchmarks/`.
+The directory includes
 34 sub-directories representing
 the Puppet modules listed in Table 1 of our paper.
 Each directory contains the `init.pp` file
@@ -337,8 +337,7 @@ the container runs the provided script,
 before the execution and analysis of
 the corresponding Puppet module.
 
-To run benchmarks, execute the following script
-from your host machine.
+To run the benchmarks, execute the following script:
 ```bash
 ./scripts/run-benchmarks.sh
 ```
@@ -360,7 +359,7 @@ then simply run
 ./scripts/run-benchamrks.sh albatrossflavour-os_patching
 ```
 
-# Run Dataset of Traces
+# Trace Dataset
 
 For further offline trace analysis,
 we also provide the traces and compiled catalogs
