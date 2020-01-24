@@ -21,13 +21,13 @@ A pre-print of the paper is available [here](https://dimitro.gr/assets/papers/SM
 # Setup
 
 The tool used in our paper
-(namely, `FSMove`) is released as
-an open-source software under
+(which we call `FSMove`) is available as
+open-source software under
 the GNU General Public License v3.0.
 
 Repository URL: https://github.com/AUEB-BALab/FSMove
 
-Clone `FSMove`
+Clone `FSMove`:
 
 ```bash
 git clone https://github.com/AUEB-BALab/fsmove
