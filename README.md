@@ -40,17 +40,17 @@ To facilitate the use of `FSMove`,
 we provide a `Dockerfile` that builds an image
 with the necessary environment for
 applying and analyzing Puppet modules.
-This image consists of the following:
+This image consists of the following elements:
 
 * An installation of `FSMove`.
-  To do so, the image installs the OCaml compiler
+  The image installs the OCaml compiler
   (version 4.0.5) and all the packages required for
   building `FSMove` from source. 
 * An installation of [Puppet](https://puppet.com/).
 * An installation of [strace](https://strace.io/).
 * A user named `fsmove` with `sudo` privileges.
 
-To build the Docker image (namely, `fsmove`), run a command of
+To build the Docker image (`fsmove`), run a command of
 the form
 ```bash
 docker build -t fsmove --build-arg IMAGE_NAME=<base-image> .
@@ -58,8 +58,8 @@ docker build -t fsmove --build-arg IMAGE_NAME=<base-image> .
 where `<base-image>` refers to the base image
 from which we set up the environment.
 In our evaluation, we ran Puppet manifests on Debian Stretch,
-so use we `debian:stretch` as the base image.
-So run
+so we used `debian:stretch` as the base image.
+So please run the following command:
 ```bash
 docker build -t fsmove --build-arg IMAGE_NAME=debian:stretch .
 ```
