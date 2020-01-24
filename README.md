@@ -30,39 +30,36 @@ Repository URL: https://github.com/AUEB-BALab/FSMove
 Clone `FSMove`
 
 ```bash
-git clone https://github.com/AUEB-BALab/FSMove
-cd FSMove
+git clone https://github.com/AUEB-BALab/fsmove
+cd fsmove
 ```
 
 ## Docker Image
 
-To facilitate the usage of `FSMove`,
+To facilitate the use of `FSMove`,
 we provide a `Dockerfile` that builds an image
 with the necessary environment for
 applying and analyzing Puppet modules.
 This image consists of the following:
 
 * An installation of `FSMove`.
-  To do so, the image installs the OCaml 4.05 compiler
-  and all the packages required for
+  To do so, the image installs the OCaml compiler
+  (version 4.0.5) and all the packages required for
   building `FSMove` from source. 
 * An installation of [Puppet](https://puppet.com/).
 * An installation of [strace](https://strace.io/).
 * A user named `fsmove` with `sudo` privileges.
 
-
-
-To build the Docker image (i.e., `fsmove`), run a command of
+To build the Docker image (namely, `fsmove`), run a command of
 the form
 ```bash
 docker build -t fsmove --build-arg IMAGE_NAME=<base-image> .
 ```
 where `<base-image>` refers to the base image
-used to set up the environment.
+from which we set up the environment.
 In our evaluation, we ran Puppet manifests on Debian Stretch,
 so use we `debian:stretch` as the base image.
 So run
-
 ```bash
 docker build -t fsmove --build-arg IMAGE_NAME=debian:stretch .
 ```
@@ -75,25 +72,25 @@ This will take roughly 10-15 minutes.
 Before running our first examples,
 let's explore the contents of our freshly-created Docker
 image.
-Run the following command to get into the image's shell.
-
+Run the following command to create a new container.
 ```bash
 docker run -ti --rm  --security-opt seccomp:unconfined fsmove
 ```
-After this, you will enter the home directory
+After executing this command,
+you will enter the home directory
 (i.e., `/home/fsmove`) of the `fsmove` user.
 This directory contains the `fsmove_src`
 where the source code of our tool is stored.
 
 To build `FSMove` on your own, run
 ```bash
-cd fsmove_src
-dune clean && dune build -p fsmove
+fsmove@606771a763fd:~$ cd fsmove_src
+fsmove@606771a763fd:~$ dune clean && dune build -p fsmove
 ```
 
 For running tests, execute
 ```bash
-dune runtest
+fsmove@606771a763fd:~$ dune runtest
 ```
 This will produce something that is similar to the following
 ```bash
@@ -108,7 +105,7 @@ After examining the source code
 of `FSMove`, you can exit from the Docker container
 by running
 ```bash
-exit
+fsmove@606771a763fd:~$ exit
 ```
 
 ## Running first examples
@@ -116,13 +113,16 @@ exit
 ### Example1: Setup a MySQL DB
 
 Inside the `example/` directory of this repository,
-there is one simple Puppet script.
-This Puppet script (`examples/mysql_db.pp`),
+there is one simple Puppet script,
+namely `example/mysql_db.pp`.
+This Puppet script
 installs the `mysql-common` and `mysql-server` packages,
-configures the file `/etc/mysql/my.cnf`,
+configures the file `/etc/mysql/my.cnf`
+wit the desired contents,
 and initializes the MySQL database by
 running the `sudo mysqld --initialize` command.
-
+In particular,
+the contents of `example/mysql_db.pp` are
 ```puppet
 $packages = ['mysql-common','mysql-server']
 package {$packages:
@@ -155,16 +155,19 @@ We will use the Docker image created
 in a previous step in order to run
 and analyze this Puppet script.
 To do so,
-run the following command.
+run the following command
 ```bash
-docker run -ti --rm  --security-opt seccomp:unconfined -v $(pwd)/examples/mysql_db.pp:/home/fsmove/init.pp -v "$(pwd)"/out:/home/fsmove/data fsmove -m mysql-db -i no -s
+docker run -ti --rm  \
+  --security-opt seccomp:unconfined \
+  -v $(pwd)/examples/mysql_db.pp:/home/fsmove/init.pp \
+  -v "$(pwd)"/out:/home/fsmove/data fsmove \
+  -m mysql-db -i no -s
 ```
-This command will execute our Puppet script
-through `FSMove` inside a Docker container.
-`FSMove` will analyze its execution trace,
+This command will execute the `example/mysql_db.pp` script
+inside a Docker container through `FSMove`.
+Our tool will analyze its execution trace,
 and will finally report the detected faults.
-After completing this process (it takes around 1-2 minutes),
-the container will exit.
+This command takes around 1-2 minutes.
 
 Below, we provide the details of
 our command.
@@ -173,18 +176,18 @@ our command.
   enables system call tracing
   inside the Docker container.
 * `-v` (Docker option): Through the option `-v`,
-  we mount two local files inside container.
+  we mount two local files inside the container.
   First, we mount the script located
-  in `$(pwd)/examples/mysql_db.pp`
+  in `$(pwd)/example/mysql_db.pp`
   into `/home/fsmove/init.pp` that
-  corresponds to the location of
-  where our container tries to find
+  corresponds to the location
+  where the container tries to find
   the entrypoint Puppet script
   that we want to analyze.
   Second, we mount the directory `$(pwd)/out`
   into `/home/fsmove/data`.
-  All the results of the analysis
-  produced during the execution of container
+  All the analysis results
+  produced during the execution of this container
   are stored in the local directory`$(pwd)/out`.
 * `-m` (Image option): This option takes the name
   of the module as it is specified in [Forge API](https://forge.puppet.com/).
@@ -356,8 +359,8 @@ examined in our evaluation.
 You can download the dataset of traces
 as follows
 ```bash
-wget -O traces.zip <url>
-tar -xvf traces.zip
+wget -O traces.tar.gz "https://zenodo.org/record/3626750/files/traces.tar.gz?download=1"
+tar -xvf traces.tar.gz
 ```
 
 To analyze all traces using `FSMove`,
