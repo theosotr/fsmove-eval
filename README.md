@@ -84,7 +84,7 @@ where the source code of our tool is stored.
 
 To build `FSMove` on your own, run
 ```bash
-fsmove@606771a763fd:~$ cd fsmove_src
+fsmove@606771a763fd:~$ cd ~/fsmove_src
 fsmove@606771a763fd:~$ dune clean && dune build -p fsmove
 ```
 
@@ -197,22 +197,22 @@ our command.
   the Puppet module from Forge API before proceeding to the analysis.
   Available options are `no`, `latest`, and `<version-number>`.
   In this example, we provided `-i no`,
-  because this Puppet script does not appear in Forge API as a separate
-  module.
-* `-s` (Image option): This flag indicates that we must run Puppet script
-  through `FSMove`. Absence of this flag applies Puppet script without
-  `FSMove`.
+  because this Puppet script does not appear in Forge API.
+  Therefore, we do not need to install it.
+* `-s` (Image option): This flag indicates that we must monitor
+  the execution of Puppet script using `FSMove`.
+  Absence of this flag applies Puppet script without monitoring.
 
 After the aforementioned command exits,
 you can examine the results of the analysis
 inside the `$(pwd)/out/` directory.
 In particular,
 the command produces the following six (6) files:
-* `mysql-db.json`: Compiled catalog of Puppet module.
+* `mysql-db.json`: Compiled catalog of the corresponding Puppet module.
 * `mysql-db.strace`: System call trace produced by `strace`.
 * `mysql-db.size`: Size of system call trace (in bytes)
 * `application.time`: Time spent to apply module.
-* `mysql-db.times`: Time spent on analysis trace analysis
+* `mysql-db.times`: Time spent on trace analysis
 * `mysql-db.faults`: Faults detected by `FSMove`.
 
 
@@ -233,7 +233,7 @@ Analysis time: 55.138767004
 In particular,
 `FSMove` detects one missing ordering relationship
 between the Puppet resource `File[/etc/mysql/my.cnf]`
-(defined at line 14 of the example Puppet script),
+(defined at line 14 of the given Puppet script),
 and the resource `Exec[Initialize MySQL DB]`
 (defined at line 20).
 These resources are conflicting on one file,
@@ -249,7 +249,8 @@ indicates that `File[/etc/mysql/my.cnf]` produced
 `/etc/mysql/my.cnf` by calling the `rename()` system call
 as it appears at line 169402 of
 the corresponding `strace` file.
-For more details see the first motivating example
+For more details about this fault,
+see the first motivating example
 described in our paper (Section 2).
 
 ### Example2: Running and analyzing a Real-world Puppet module
@@ -262,25 +263,30 @@ we will use our Docker image `fsmove`
 to spawn a fresh Puppet environment.
 Run the following command
 ```bash
-docker run -ti --rm  --security-opt seccomp:unconfined -v "$(pwd)"/out:/home/fsmove/data fsmove -m alertlogic-al_agents -i 0.2.0 -s
+docker run -ti --rm  \
+  --security-opt seccomp:unconfined \
+  -v "$(pwd)"/out:/home/fsmove/data fsmove \
+  -m alertlogic-al_agents -i 0.2.0 -s
 ```
 Notice that this time,
 we provided the option `-i 0.2.0`,
 as we need to install the `alertlogic-al_agents` module
 (version 0.2.0) in the system,
 before proceeding to the analysis.
+As already discussed,
+this module is taken
+from [Forge API](https://forge.puppet.com/alertlogic/al_agents).
 Also,
 notice that this time
 we did not mount any file into
 `/home/fsmove/init.pp`,
-because the script will create the entrypoint file
-that uses `alertlogic-al_agents`,
-after the installation of the corresponding module.
+because the container creates it automatically
+after the installation of the `alertlogic-al_agents` module.
 
 After the completion of the command above
 (it takes 1-2 minutes),
-we are now ready to examine the results of the analysis
-stored inside the `out/` directory.
+we are now ready to examine the fault detection results
+stored inside the `$(pwd)/out/` directory.
 The contents of `out/alertlogic-al_agents.faults` file
 are
 ```bash
@@ -304,14 +310,16 @@ see Section 6.3.1 of our paper.
 
 # Run Benchmarks
 
-The directory `benchmarks/` includes
-34 directories representing
+This repository also includes one directory,
+that is `benchmarks/`,
+which includes
+34 sub-directories representing
 the Puppet modules listed in Table 1 of our paper.
 Each directory contains the `init.pp` file
 corresponding to the entrypoint script for executing the
 module inside the container,
-and the `params.txt` contains parameters for
-properly setting up the environment before analysis.
+and the `params.txt` file contains parameters for
+setting up the environment properly.
 For example,
 the following `params.txt` shows that
 the script needs to install `albatrossflavour-os_patching`
@@ -322,10 +330,12 @@ version: 0.11.2
 modulepath: /home/fsmove/.puppet/etc/code/modules
 modulename: albatrossflavour-os_patching
 ```
-Some modules optionally contain a script
-named `pre-script.sh`,
-in case it is needed to run a custom script
-before the execution and analysis of Puppet module.
+Some modules optionally contain a custom script
+named `pre-script.sh`.
+In this case,
+the container runs the provided script,
+before the execution and analysis of
+the corresponding Puppet module.
 
 To run benchmarks, execute the following script
 from your host machine.
@@ -337,7 +347,7 @@ It produces a directory
 (namely `benchmark-results`)
 that contains the analysis results
 for every benchmark.
-Each sub-directory contains the six files produced by the analysis
+Each sub-directory contains the six files produced from the analysis
 of the corresponding module.
 The script also generates the `benchmark-results/faults.csv`
 file that shows the occurrence of each fault type
@@ -356,6 +366,8 @@ For further offline trace analysis,
 we also provide the traces and compiled catalogs
 stemming from the execution of all Puppet modules
 examined in our evaluation.
+Dataset URL: https://doi.org/10.5281/zenodo.3626750
+
 You can download the dataset of traces
 as follows
 ```bash
@@ -368,7 +380,10 @@ create a container,
 and enter container's shell
 by running.
 ```bash
-docker run -ti --rm  --security-opt seccomp:unconfined -v $(pwd)/scripts:/home/fsmove/scripts  -v $(pwd)/traces:/home/fsmove/traces fsmove
+docker run -ti --rm  \
+  --security-opt seccomp:unconfined \
+  -v $(pwd)/scripts:/home/fsmove/scripts \
+  -v $(pwd)/traces:/home/fsmove/traces fsmove
 ```
 Then, run the following command from the newly-created container
 ```bash
