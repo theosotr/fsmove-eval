@@ -1,8 +1,6 @@
 # Artifact for "Practical Fault Detection in Puppet Programs" (ICSE'20)
 
-This repository contains instructions
-and scripts to re-run the evaluation
-of the ICSE'20 paper
+This is the artifact for the ICSE'20 paper
 "Practical Fault Detection in Puppet Programs".
 
 A pre-print of the paper is available [here](https://dimitro.gr/assets/papers/SMS20.pdf).
@@ -10,7 +8,7 @@ A pre-print of the paper is available [here](https://dimitro.gr/assets/papers/SM
 
 # Requirements
 
-* A Unix-like operating system.
+* A Unix-like operating system (tested on Ubuntu).
 
 * An installation of Docker (Please, follow the instructions from
   the official [documentation](https://docs.docker.com/install/)).
@@ -20,57 +18,7 @@ A pre-print of the paper is available [here](https://dimitro.gr/assets/papers/SM
 
 # Setup
 
-The tool used in our paper,
-which we call `FSMoVe` (File System Model Verifier),
-is available as
-open-source software under
-the GNU General Public License v3.0.
-
-Repository URL: https://github.com/AUEB-BALab/fsmove
-
-This repository contains our tool as a submodule
-in the `fsmove` directory. Enter this directory
-by running
-```bash
-cd fsmove
-```
-
-## Docker Image
-
-To facilitate the use of `FSMoVe`,
-we provide a `Dockerfile` that builds an image
-with the necessary environment for
-applying and analyzing Puppet modules.
-This image consists of the following elements:
-
-* An installation of `FSMoVe`.
-  The image installs the OCaml compiler
-  (version 4.0.5) and all the packages required for
-  building `FSMoVe` from source. 
-* An installation of [Puppet](https://puppet.com/).
-* An installation of [strace](https://strace.io/).
-* A user named `fsmove` with `sudo` privileges.
-
-To build a Docker image named `fsmove`, run a command of
-the form
-```bash
-docker build -t fsmove --build-arg IMAGE_NAME=<base-image> .
-```
-where `<base-image>` refers to the base image
-from which we set up the environment.
-In our evaluation, we ran Puppet manifests on Debian Stretch,
-so we used `debian:stretch` as the base image.
-So please run the following command:
-```bash
-docker build -t fsmove --build-arg IMAGE_NAME=debian:stretch .
-```
-This will take roughly 10-15 minutes.
-After building the Docker image successfully,
-please go to the root directory of this repository
-```bash
-cd ..
-```
-
+See [INSTALL.md](./INSTALL.md)
 # Getting Started
 
 ## Navigating through the Docker Image
@@ -152,13 +100,13 @@ fsmove@606771a763fd:~$ exit
 
 ### Example1: Setup a MySQL DB
 
-Inside the `example/` directory of this repository,
+Inside the `example/` directory of the artifact,
 there is one simple Puppet script,
 namely `example/mysql_db.pp`.
 This Puppet script
 installs the `mysql-common` and `mysql-server` packages,
 configures the file `/etc/mysql/my.cnf`
-wit the desired contents,
+with the desired contents,
 and initializes the MySQL database by
 running the `sudo mysqld --initialize` command.
 In particular,
@@ -199,7 +147,7 @@ run the following command
 ```bash
 docker run -ti --rm  \
   --security-opt seccomp:unconfined \
-  -v $(pwd)/examples/mysql_db.pp:/home/fsmove/init.pp \
+  -v $(pwd)/example/mysql_db.pp:/home/fsmove/init.pp \
   -v "$(pwd)"/out:/home/fsmove/data fsmove \
   -m mysql-db -i no -s
 ```
@@ -252,7 +200,7 @@ the command produces the following six (6) files:
 * `mysql-db.strace`: a system call trace produced by `strace`.
 * `mysql-db.size`: the size of system call trace (in bytes)
 * `application.time`: time spent to apply the module.
-* `mysql-db.times`: time spent on trace analysis
+* `mysql-db.times`: time spent on trace analysis and fault detection.
 * `mysql-db.faults`: faults detected by `FSMoVe`.
 
 
@@ -277,7 +225,7 @@ between the Puppet resource `File[/etc/mysql/my.cnf]`
 and the resource `Exec[Initialize MySQL DB]`
 (defined at line 20).
 These resources are conflicting on one file,
-but there is no dependency between them.
+and there is no dependency between them.
 Specifically,
 `File[/etc/mysql/my.cnf]` produces the file `/etc/mysql/my.cnf`,
 while `Exec[Initialize MySQL DB]` consumes the same file.
@@ -289,6 +237,16 @@ indicates that `File[/etc/mysql/my.cnf]` produced
 `/etc/mysql/my.cnf` by calling the `rename()` system call
 as it appears at line 169402 of
 the corresponding `strace` file.
+Note that in this example,
+`FSMoVe` employs an _online_ analysis.
+This means that it applies the given Puppet manifest
+in parallel with trace analysis.
+Therefore,
+the `Analysis time` shown in the report above
+corresponds to the overall time,
+i.e., Puppet execution time, trace analysis time,
+and fault detection time.
+
 For more details about this fault,
 see the first motivating example
 described in our paper (Section 2).
@@ -303,6 +261,7 @@ we will use our Docker image `fsmove`
 to spawn a fresh Puppet environment.
 Run the following command
 ```bash
+cd ~/fsmove-eval
 docker run -ti --rm  \
   --security-opt seccomp:unconfined \
   -v "$(pwd)"/out:/home/fsmove/data fsmove \
@@ -343,14 +302,14 @@ Pairs:
 Analysis time: 23.1748681068
 ```
 Notably,
-`FSMoVe` detected one ordering violation,
+`FSMoVe` detects one ordering violation,
 between `Exec[download]` and `Package[al-agent]` resources.
 For more details about this fault,
 see Section 6.3.1 of our paper.
 
 # Benchmarks
 
-This repository also includes one directory:
+The artifact also includes one directory:
 `benchmarks/`.
 The directory includes
 34 sub-directories representing
@@ -379,6 +338,7 @@ the corresponding Puppet module.
 
 To run the benchmarks, execute the following script:
 ```bash
+cd ~/fsmove-eval
 ./scripts/run-benchmarks.sh
 ```
 This script will take 20-50 minutes depending on your machine.
@@ -399,6 +359,9 @@ then simply run
 ./scripts/run-benchamrks.sh albatrossflavour-os_patching
 ```
 
+*NOTE*: Some catalog applications are not deterministic;
+thus there might be a slight variation is some modules.
+
 # Trace Dataset
 
 For further offline trace analysis,
@@ -410,6 +373,7 @@ Dataset URL: https://doi.org/10.5281/zenodo.3626750
 You can download the dataset of traces
 as follows
 ```bash
+cd ~/fsmove-eval
 wget -O traces.tar.gz "https://zenodo.org/record/3626750/files/traces.tar.gz?download=1"
 tar -xvf traces.tar.gz
 ```
@@ -417,7 +381,8 @@ tar -xvf traces.tar.gz
 To analyze all traces using `FSMoVe`,
 create a container,
 and enter container's shell
-by running.
+by running the following command
+from the root directory of the artifact.
 ```bash
 docker run -ti --rm  \
   --security-opt seccomp:unconfined \
@@ -429,7 +394,7 @@ Then, run the following command from the newly-created container
 fsmove@b7b5bca1a9df:~$ ./scripts/analyze-traces.sh traces
 ```
 When this script terminates
-(roughly 10-20 minutes),
+(it takes roughly 10-20 minutes),
 you can exit container and
 inspect the analysis results
 stored in `traces/` directory.
