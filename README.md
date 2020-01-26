@@ -20,37 +20,38 @@ A pre-print of the paper is available [here](https://dimitro.gr/assets/papers/SM
 
 # Setup
 
-The tool used in our paper
-(which we call `FSMove`) is available as
+The tool used in our paper,
+which we call `FSMoVe` (File System Model Verifier),
+is available as
 open-source software under
 the GNU General Public License v3.0.
 
-Repository URL: https://github.com/AUEB-BALab/FSMove
+Repository URL: https://github.com/AUEB-BALab/fsmove
 
-Clone `FSMove`:
-
+This repository contains our tool as a submodule
+in the `fsmove` directory. Enter this directory
+by running
 ```bash
-git clone https://github.com/AUEB-BALab/fsmove
 cd fsmove
 ```
 
 ## Docker Image
 
-To facilitate the use of `FSMove`,
+To facilitate the use of `FSMoVe`,
 we provide a `Dockerfile` that builds an image
 with the necessary environment for
 applying and analyzing Puppet modules.
 This image consists of the following elements:
 
-* An installation of `FSMove`.
+* An installation of `FSMoVe`.
   The image installs the OCaml compiler
   (version 4.0.5) and all the packages required for
-  building `FSMove` from source. 
+  building `FSMoVe` from source. 
 * An installation of [Puppet](https://puppet.com/).
 * An installation of [strace](https://strace.io/).
 * A user named `fsmove` with `sudo` privileges.
 
-To build the Docker image (`fsmove`), run a command of
+To build a Docker image named `fsmove`, run a command of
 the form
 ```bash
 docker build -t fsmove --build-arg IMAGE_NAME=<base-image> .
@@ -64,6 +65,11 @@ So please run the following command:
 docker build -t fsmove --build-arg IMAGE_NAME=debian:stretch .
 ```
 This will take roughly 10-15 minutes.
+After building the Docker image successfully,
+please go to the root directory of this repository
+```bash
+cd ..
+```
 
 # Getting Started
 
@@ -82,10 +88,12 @@ you will be able to enter the home directory
 This directory contains the `fsmove_src`
 where the source code of our tool is stored.
 
-To build `FSMove` on your own, run
+To build `FSMoVe` on your own, run
 ```bash
 fsmove@606771a763fd:~$ cd ~/fsmove_src
-fsmove@606771a763fd:~$ dune clean && dune build -p fsmove
+fsmove@606771a763fd:~$ dune clean
+fsmove@606771a763fd:~$ dune build -p fsmove
+fsmove@606771a763fd:~$ dune install
 ```
 
 For running tests, execute
@@ -93,7 +101,7 @@ For running tests, execute
 fsmove@606771a763fd:~$ dune runtest
 ```
 This will produce something that is similar to the following
-```bash
+```
 fsmove@606771a763fd:~$ dune runtest
 run_tests alias fsmove_src/test/runtest
 ................................................................
@@ -101,8 +109,40 @@ Ran: 64 tests in: 0.11 seconds.
 OK
 ```
 
+### Usage
+
+```
+fsmove@9babcfdeb960:~/fsmove_src$ fsmove -help
+Applies a Puppet manifest and collects its system call trace.
+
+  fsmove
+
+=== flags ===
+
+  -catalog Path            to the compiled catalog of Puppet manifest.
+  -mode Analysis           mode; either online or offline
+  [-dump-puppet-out File]  to store output from Puppet execution (for debugging
+                           only)
+  [-graph-file File]       to store the dependency graph inferred by the
+                           compiled catalog.
+  [-graph-format Format]   for storing the dependency graph of the provided
+                           Puppet manifest.
+  [-manifest Path]         to the entrypoint manifest that we need to apply.
+                           (Avaiable only when mode is 'online')
+  [-modulepath Path]       to the directory of the Puppet modules. (Available
+                           only when mode is 'online')
+  [-package-notify]        Consider missing notifiers from packages to services
+  [-print-stats]           Print stats about execution and analysis
+  [-trace-file Path]       to the trace file produced by the 'strace' tool.
+  [-build-info]            print info about this build and exit
+  [-version]               print the version of this build and exit
+  [-help]                  print this help text and exit
+                           (alias: -?)
+
+```
+
 After examining the source code
-of `FSMove`, you can exit from the Docker container
+of `FSMoVe`, you can exit from the Docker container
 by running
 ```bash
 fsmove@606771a763fd:~$ exit
@@ -150,7 +190,7 @@ exec {'Initialize MySQL DB':
 }
 ```
 The Puppet script above contains a fault
-that we are going to detect using `FSMove`.
+that we are going to detect using `FSMoVe`.
 We will use the Docker image created
 in a previous step in order to run
 and analyze this Puppet script.
@@ -164,7 +204,7 @@ docker run -ti --rm  \
   -m mysql-db -i no -s
 ```
 This command will execute the `example/mysql_db.pp` script
-inside a Docker container through `FSMove`.
+inside a Docker container through `FSMoVe`.
 Our tool will analyze its execution trace,
 and will finally report the detected faults.
 This command takes around 1-2 minutes.
@@ -200,7 +240,7 @@ our command.
   because this Puppet script does not appear in Forge API.
   Therefore, we do not need to install it.
 * `-s` (Image option): This flag indicates that we must monitor
-  the execution of Puppet script using `FSMove`.
+  the execution of Puppet script using `FSMoVe`.
   Absence of this flag applies Puppet script without monitoring.
 
 After the aforementioned command exits,
@@ -213,7 +253,7 @@ the command produces the following six (6) files:
 * `mysql-db.size`: the size of system call trace (in bytes)
 * `application.time`: time spent to apply the module.
 * `mysql-db.times`: time spent on trace analysis
-* `mysql-db.faults`: faults detected by `FSMove`.
+* `mysql-db.faults`: faults detected by `FSMoVe`.
 
 
 The contents of `mysql-db.faults` are similar to the following:
@@ -231,7 +271,7 @@ Pairs:
 Analysis time: 55.138767004
 ```
 In particular,
-`FSMove` detects one missing ordering relationship
+`FSMoVe` detects one missing ordering relationship
 between the Puppet resource `File[/etc/mysql/my.cnf]`
 (defined at line 14 of the given Puppet script),
 and the resource `Exec[Initialize MySQL DB]`
@@ -242,7 +282,7 @@ Specifically,
 `File[/etc/mysql/my.cnf]` produces the file `/etc/mysql/my.cnf`,
 while `Exec[Initialize MySQL DB]` consumes the same file.
 For debugging purposes,
-`FSMove` also reports the system call
+`FSMoVe` also reports the system call
 and the corresponding line in `mysql-db.strace`.
 For example, `( rename at line 169402 )`
 indicates that `File[/etc/mysql/my.cnf]` produced
@@ -257,7 +297,7 @@ described in our paper (Section 2).
 
 It's time to run and analyze a real-world Puppet module,
 namely [alertlogic-al_agents](https://forge.puppet.com/alertlogic/al_agents),
-using `FSMove`.
+using `FSMoVe`.
 Again,
 we will use our Docker image `fsmove`
 to spawn a fresh Puppet environment.
@@ -303,7 +343,7 @@ Pairs:
 Analysis time: 23.1748681068
 ```
 Notably,
-`FSMove` detected one ordering violation,
+`FSMoVe` detected one ordering violation,
 between `Exec[download]` and `Package[al-agent]` resources.
 For more details about this fault,
 see Section 6.3.1 of our paper.
@@ -374,7 +414,7 @@ wget -O traces.tar.gz "https://zenodo.org/record/3626750/files/traces.tar.gz?dow
 tar -xvf traces.tar.gz
 ```
 
-To analyze all traces using `FSMove`,
+To analyze all traces using `FSMoVe`,
 create a container,
 and enter container's shell
 by running.
