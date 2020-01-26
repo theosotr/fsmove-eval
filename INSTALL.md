@@ -2,7 +2,7 @@
 
 To get the artifact, run
 ```bash
-git clone --recursive https://github.com/theosotr/fsmove-eval ~/fsmove_eval
+git clone --recursive https://github.com/theosotr/fsmove-eval ~/fsmove-eval
 ```
 The artifact contains the instructions and scripts
 to re-run the evaluation of our paper.
