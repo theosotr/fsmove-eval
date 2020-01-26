@@ -15,6 +15,8 @@ open-source software under
 the GNU General Public License v3.0.
 
 Repository URL: https://github.com/AUEB-BALab/fsmove
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3627890.svg)](https://doi.org/10.5281/zenodo.3627890)
+
 
 The source code of `FSMoVe` is located inside
 the `fsmove` directory. Enter this directory
