@@ -360,7 +360,7 @@ then simply run
 ```
 
 *NOTE*: Some catalog applications are not deterministic;
-thus there might be a slight variation is some modules.
+thus, there might be a slight variation is some modules.
 
 # Trace Dataset
 
