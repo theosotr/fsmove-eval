@@ -1,5 +1,10 @@
 #! /bin/bash
 
+if (( $EUID != 0  )); then
+  echo "Please run this script as super user"
+  exit 1
+fi
+
 basedir=`dirname $0`
 outdir=benchmark-results
 
@@ -85,3 +90,6 @@ for file in benchmark-results/*; do
   total=$((mn + mor))
   echo "$base,$total,$mor,$mn" >> benchmark-results/faults.csv
 done
+
+user=$(logname)
+chown -R $user:$user benchmark-results

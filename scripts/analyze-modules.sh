@@ -45,7 +45,7 @@ analyze_module() {
         init_file=$(realpath $puppet_file)
     fi
 
-    base_cmd="sudo docker run --name $module_basename\
+    base_cmd="docker run --name $module_basename\
         -v $module_dir:$fsmove_home/data \
         -v $init_file:$fsmove_home/init.pp \
         --security-opt seccomp:unconfined"
@@ -76,7 +76,7 @@ analyze_module() {
         echo "Cannot trigger module $module" >> ./warnings.txt
     fi
 
-    sudo docker rm $module_basename
+    docker rm $module_basename
 }
 
 
