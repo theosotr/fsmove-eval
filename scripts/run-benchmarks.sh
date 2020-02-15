@@ -1,6 +1,6 @@
 #! /bin/bash
 
-if (( $EUID != 0  )); then
+if [[ $(id -u) -ne 0  ]]; then
   echo "Please run this script as super user"
   exit 1
 fi
